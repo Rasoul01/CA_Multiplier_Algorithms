@@ -68,21 +68,20 @@ public class AddAndShift {
                         m = BinaryLiteral.add(m, a.shiftLeft(i - 1));
                         writer.write(String.format("(%d,+) M=%s|%s", i, m.toString(), b.toString()));
                     }
-                    if (m.getCarry()) {
-                        if (sameSign && m.getMSB() == '0')
-                            writer.write(" (C)");   //Carry Sign
-                        else
-                            writer.write(" (×)");   //throwing away carry bit
-                    }
-                    writer.write('\n');
                 } else
-                    writer.write(String.format("(%d, ) M=%s|%s\n", i, m.toString(), b.toString()));
+                    writer.write(String.format("(%d, ) M=%s|%s", i, m.toString(), b.toString()));
 
                 BinaryLiteral newM = BinaryLiteral.decimalToBinaryLiteral(m.toDecimal(), m.getLength() + 1, true);
-                if (m.getCarry() && sameSign && m.getMSB() == '0')
-                    newM.setMSB('1');
+                if (m.getCarry()) {
+                    if (sameSign && m.getMSB() == '0') {
+                        newM.setMSB('1');
+                        writer.write(" (C)");   //Carry Sign
+                     } else
+                        writer.write(" (×)");   //throwing away carry bit
+                }
                 m = newM;
                 b = b.shiftRightLogical();
+                writer.write('\n');
                 writer.write(String.format("(%d,>) M=%s|%s\n", i, m.toString(), b.toString()));
                 writer.write("~~~~~~~~~~~~~~~~~~~~~\n");
             }
