@@ -9,7 +9,7 @@ import java.util.Arrays;
  */
 public class BinaryLiteral {
     private int length;
-    private boolean isSigned = false;
+    private boolean isSigned;
     private boolean hasCarry = false;
     private char[] binaryArray;
 
@@ -43,8 +43,24 @@ public class BinaryLiteral {
     }
 
     public static BinaryLiteral decimalToBinaryLiteral(int decimalNumber, int length, boolean isSigned) {
-        //TODO: check for length <= 0
-        //TODO: check if number can be shown in desired length
+        if (length <= 0)
+            throw new IllegalArgumentException("Binary number length should greater than zero.");
+        if (decimalNumber < 0 && !isSigned)
+            throw new IllegalArgumentException("Can't convert Negative number to unsigned binary.");
+
+        if (isSigned) {
+            if (decimalNumber < 0) {
+                if ((-1 * (Math.pow(2, length - 1))) > decimalNumber)
+                    throw new ArithmeticException("Desired length is not enough to convert decimal number.");
+            } else {
+                if (Math.pow(2, length - 1) <= decimalNumber)
+                    throw new ArithmeticException("Desired length is not enough to convert decimal number.");
+            }
+        } else {
+            if (Math.pow(2, length) <= decimalNumber)
+                throw new ArithmeticException("Desired length is not enough to convert decimal number.");
+        }
+
         BinaryLiteral binaryLiteral = new BinaryLiteral(isSigned);
         binaryLiteral.setLength(length);
 
@@ -54,14 +70,15 @@ public class BinaryLiteral {
         // There wouldn't be any issue if the number is negative as a result of max binary number length is 32.
         // So we only need to zero-fill if the number is non-negative to get the desired length.
 
+
+        // Sign-extend the array to desired length
+        if (decimalNumber >= 0)
+            Arrays.fill(tempArray, '0');
+        else
+            Arrays.fill(tempArray, '1');
         // Extended sign bits would be cut to desired length
-        for (int i = 0; i < length; i++) {
-            // Zero-fill to desired length
-            if (i >= binaryString.length())
-                tempArray[i] = '0';
-            else
-                tempArray[i] = binaryString.charAt(binaryString.length() - i - 1);
-        }
+        for (int i = 0; i < Math.min(length, binaryString.length()); i++)
+            tempArray[i] = binaryString.charAt(binaryString.length() - i - 1);
 
         binaryLiteral.setBinaryArray(tempArray);
         return binaryLiteral;
@@ -90,8 +107,7 @@ public class BinaryLiteral {
     }
 
     public BinaryLiteral twosComplement() {
-        return decimalToBinaryLiteral(
-                (Integer.parseInt(this.onesComplement().toString(), 2) + 1), this.length, true);
+        return add(this.onesComplement(), decimalToBinaryLiteral(1, this.length, true));
     }
     public BinaryLiteral onesComplement() {
         BinaryLiteral complement = new BinaryLiteral(true);
@@ -137,6 +153,10 @@ public class BinaryLiteral {
         return returnBin;
     }
 
+    /**
+     * @param shiftAmount the amount to be shifted
+     * @return A new Binary Literal with the length added by one.
+     */
     public BinaryLiteral shiftLeft(int shiftAmount) {
         if (shiftAmount < 0)
             throw new IllegalArgumentException("Shift amount can't be negative");
@@ -156,20 +176,20 @@ public class BinaryLiteral {
 
     public static BinaryLiteral add(BinaryLiteral a, BinaryLiteral b) {
         int maxLength = Math.max(a.length, b.length);
+        if (a.getLength() > b.getLength()) {
+            b = decimalToBinaryLiteral(b.toDecimal(), maxLength, b.isSigned);
+        } else if (a.getLength() < b.getLength()) {
+            a = decimalToBinaryLiteral(a.toDecimal(), maxLength, a.isSigned);
+        }
         int carry = 0;
         char[] result = new char[maxLength];
 
-        int aIndex = a.length - 1;
-        int bIndex = b.length - 1;
-
-        int i = 0;
-        while (i < maxLength) {
-            int bitA = (i <= aIndex) ? a.binaryArray[i] - '0' : 0;
-            int bitB = (i <= bIndex) ? b.binaryArray[i] - '0' : 0;
+        for (int i = 0; i < maxLength; i++){
+            int bitA = a.binaryArray[i] - '0';
+            int bitB = b.binaryArray[i] - '0';
             int sum = bitA + bitB + carry;
             result[i] = (char) ((sum % 2) + '0');
             carry = sum / 2;
-            i++;
         }
 
         BinaryLiteral sumBin = new BinaryLiteral();
