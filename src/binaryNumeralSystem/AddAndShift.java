@@ -45,7 +45,7 @@ public class AddAndShift {
     public static void addAndShiftSigned (BinaryLiteral firstNum, BinaryLiteral secondNum) {
 
         try (BufferedWriter writer = new BufferedWriter(new FileWriter("out.txt",true))) {
-            BinaryLiteral m = BinaryLiteral.decimalToBinaryLiteral(0, firstNum.getLength(), false);
+            BinaryLiteral m = BinaryLiteral.decimalToBinaryLiteral(0, firstNum.getLength(), true);
             BinaryLiteral a = firstNum;
             BinaryLiteral b = secondNum;
 

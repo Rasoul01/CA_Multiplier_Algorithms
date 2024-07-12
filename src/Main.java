@@ -28,16 +28,21 @@ public class Main {
                 writer.write("out-" + i + "\n");
                 writer.flush();
                 BinaryLiteral a, b;
-                a = decimalToBinaryLiteral(firstNum, numLength, isSigned);
-                b = decimalToBinaryLiteral(secondNum, numLength, isSigned);
                 switch (opCode) {
                     case 0 -> {
+                        a = decimalToBinaryLiteral(firstNum, numLength, isSigned);
+                        b = decimalToBinaryLiteral(secondNum, numLength, isSigned);
                         if (isSigned)
                             addAndShiftSigned(a, b);
                         else
                             addAndShiftUnsigned(a, b);
                     }
-                    case 1 -> boothMultiplication(a, b);
+                    case 1 -> {
+                        // Numbers are always signed in Booth algorithm
+                        a = decimalToBinaryLiteral(firstNum, numLength, true);
+                        b = decimalToBinaryLiteral(secondNum, numLength, true);
+                        boothMultiplication(a, b);
+                    }
 //                    default ->
                 }
                 System.out.println("Operation " + i + " Done!");
